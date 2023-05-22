@@ -26,8 +26,12 @@ def autoencoder_model(in_shape):
     return Model(inputs, x)
 
 
-def ssim_loss(y_true, y_pred):
-    return 1-tf.reduce_mean(tf.image.ssim(y_true, y_pred, 2.0))
+def MAE_SSIM(y_true, y_pred):
+    return 1 - tf.reduce_mean(ssim(y_true, y_pred))
+
+
+def ssim(y_true, y_pred):
+    return tf.image.ssim(y_true, y_pred, 2.0)
 
 
 if __name__ == '__main__':
@@ -51,6 +55,7 @@ if __name__ == '__main__':
         train_dir = data_dir + '/train'
         test_dir = data_dir + '/test'
         ckpt_dir = ckpt["weights_path"]
+        ckpt_dir_load = ckpt["weights_path_unedited"]
         model_dir = ckpt["model_path"]
 
         # Load data
@@ -70,7 +75,8 @@ if __name__ == '__main__':
 
         # Optimizer
         optimizer = tf.keras.optimizers.Adam(0.001)
-        autoencoder.compile(optimizer=optimizer, loss=ssim_loss, metrics=[ssim_loss, 'accuracy'])
+        autoencoder.compile(optimizer=optimizer, loss=MAE_SSIM,
+                            metrics=[ssim, 'accuracy'])
         autoencoder.summary()
 
         # Load weights (if any)
@@ -82,7 +88,7 @@ if __name__ == '__main__':
         history = autoencoder.fit(
             x=trainblur,
             y=trainsharp,
-            epochs=50,
+            epochs=60,
             batch_size=16,
             shuffle=True,
             validation_data=(testblur, testsharp),
@@ -94,11 +100,11 @@ if __name__ == '__main__':
         print(f"accuracy: {accuracy * 100:.2f}%")
 
         # Save model
-        autoencoder.save(model_dir+f"/autoencoder-{accuracy* 100:.2f}%.h5")
+        autoencoder.save(model_dir + f"/autoencoder-{accuracy * 100:.2f}%.h5")
 
         # Test set prediction
         predictions = autoencoder.predict(testblur)
         display(testblur, predictions, n=5)  # Display n results from test set
 
         # Show Training History Graphs
-        plot_training_history(history)
+        plot_training_history(history, save=True)

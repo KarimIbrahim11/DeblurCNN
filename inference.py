@@ -1,6 +1,6 @@
 import tensorflow as tf
 from pipeline import autoencoder_model
-from pipeline import ssim_loss
+from pipeline import MAE_SSIM, ssim
 from PIL import Image
 import numpy as np
 import configparser
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # Optimizer
     optimizer = tf.keras.optimizers.Adam(0.001)
-    model.compile(optimizer=optimizer, loss=ssim_loss, metrics=[ssim_loss, 'accuracy'])
+    model.compile(optimizer=optimizer, loss=MAE_SSIM, metrics=[ssim, 'accuracy'])
 
     # Load Weights
     model.load_weights(ckpt_dir)

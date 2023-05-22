@@ -2,12 +2,21 @@ import os
 import datetime
 from PIL import Image
 import numpy as np
+# from pipeline import MAE_SSIM, ssim
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
 from tensorflow.keras import layers
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.models import Model
+
+
+def MAE_SSIM(y_true, y_pred):
+    return 1 - tf.reduce_mean(ssim(y_true, y_pred))
+
+
+def ssim(y_true, y_pred):
+    return tf.image.ssim(y_true, y_pred, 2.0)
 
 
 def display_images(array1, array2):
@@ -33,38 +42,37 @@ def display_images(array1, array2):
 
 
 def load_images_as_arrays(folder_path, input_shape):
-  image_list = os.listdir(folder_path)
-  num_images = len(image_list)
+    image_list = os.listdir(folder_path)
+    num_images = len(image_list)
 
-  images = np.empty((num_images, *input_shape), dtype=np.float32)
-  images = images.transpose(0,2,1,3)
-  # print(images[0].shape)
+    images = np.empty((num_images, *input_shape), dtype=np.float32)
+    images = images.transpose(0, 2, 1, 3)
+    # print(images[0].shape)
 
-  for i, image_name in enumerate(image_list):
-    image_path = os.path.join(folder_path, image_name)
-    image = Image.open(image_path)
-    # print("Loaded image size:", image.size)
-    image = image.resize(input_shape[:2])  # Resize image to the desired input shape
-    # print("Resized image size:", image.size)
-    image_array = np.array(image)
-    # Display the image using matplotlib
-    normalized_image = (image_array / 127.5) - 1.0
-    images[i] = normalized_image
+    for i, image_name in enumerate(image_list):
+        image_path = os.path.join(folder_path, image_name)
+        image = Image.open(image_path)
+        # print("Loaded image size:", image.size)
+        image = image.resize(input_shape[:2])  # Resize image to the desired input shape
+        # print("Resized image size:", image.size)
+        image_array = np.array(image)
+        # Display the image using matplotlib
+        normalized_image = (image_array / 127.5) - 1.0
+        images[i] = normalized_image
 
-  return images
+    return images
 
 
 def load_data_from_dir(dir, input_shape):
-  blur = load_images_as_arrays(dir+'/blurred', input_shape)
-  sharp = load_images_as_arrays(dir+'/sharpened', input_shape)
-  return blur, sharp
+    blur = load_images_as_arrays(dir + '/blurred', input_shape)
+    sharp = load_images_as_arrays(dir + '/sharpened', input_shape)
+    return blur, sharp
 
 
 def display(array1, array2, n):
     """
     Displays n random images from each one of the supplied arrays.
     """
-
 
     indices = np.random.randint(len(array1), size=n)
     images1 = array1[indices, :]
@@ -73,12 +81,12 @@ def display(array1, array2, n):
     plt.figure(figsize=(20, 4))
     for i, (image1, image2) in enumerate(zip(images1, images2)):
         ax = plt.subplot(2, n, i + 1)
-        plt.imshow(image1.reshape(100,360,3))
+        plt.imshow(image1.reshape(100, 360, 3))
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
         ax = plt.subplot(2, n, i + 1 + n)
-        plt.imshow(image1.reshape(100,360,3))
+        plt.imshow(image1.reshape(100, 360, 3))
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
@@ -86,17 +94,17 @@ def display(array1, array2, n):
 
 
 # Plotting the training history (loss and vall
-def plot_training_history(history):
+def plot_training_history(history, save=True):
     # Get the classification accuracy and loss-value
     # for the training-set.
     acc = history.history['accuracy']
     loss = history.history['loss']
-    ssimloss = history.history['ssim_loss']
+    ssimloss = history.history['ssim']
 
     # Get it for the validation-set (we only use the test-set).
     val_acc = history.history['val_accuracy']
     val_loss = history.history['val_loss']
-    val_ssimloss = history.history['val_ssim_loss']
+    val_ssimloss = history.history['val_ssim']
 
     # Plot the accuracy and loss-values for the training-set.
     plt.plot(acc, linestyle='-', color='b', label='Training Acc.')
@@ -115,5 +123,6 @@ def plot_training_history(history):
     # Ensure the plot shows correctly.
     plt.ylim(top=0.8)
     plt.xlim(left=0)
-    plt.savefig(f'training_plots/train-{datetime.datetime.now().hour}.png')
+    if save:
+        plt.savefig(f'training_plots/train-{datetime.datetime.now().hour}.png')
     plt.show()
