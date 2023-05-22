@@ -59,12 +59,11 @@ def load_data_from_dir(dir, input_shape):
   return blur, sharp
 
 
-def display(array1, array2):
+def display(array1, array2, n):
     """
-    Displays ten random images from each one of the supplied arrays.
+    Displays n random images from each one of the supplied arrays.
     """
 
-    n = 10
 
     indices = np.random.randint(len(array1), size=n)
     images1 = array1[indices, :]
