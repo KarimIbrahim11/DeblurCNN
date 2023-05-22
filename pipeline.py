@@ -49,8 +49,8 @@ if __name__ == '__main__':
         ckpt = config_obj["ckpt"]
 
         data_dir = dbparam['dataset_path']
-        train_dir = data_dir + '/dummytrain'
-        test_dir = data_dir + '/dummytest'
+        train_dir = data_dir + '/train'
+        test_dir = data_dir + '/test'
         ckpt_dir = ckpt["weights_path"]
         model_dir = ckpt["model_path"]
 
