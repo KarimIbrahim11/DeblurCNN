@@ -23,7 +23,6 @@ def autoencoder_model(in_shape):
     # normalized_decoded = layers.Conv2D(3, (3, 3), activation='sigmoid', padding='same')(x)
     # decoded = layers.Lambda(lambda x: (x * 0.5) + 0.5)(normalized_decoded)
 
-    # Autoencoder
     return Model(inputs, x)
 
 
