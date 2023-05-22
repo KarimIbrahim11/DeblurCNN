@@ -26,6 +26,8 @@ def preprocess_img(img):
 if __name__ == '__main__':
     # Specifying Directories
     # Read config.ini file
+    img_pth = "demo/1.png"
+
     config_obj = configparser.ConfigParser()
     config_obj.read("D:\Coding Projects\Pycharm Projects\DeblurCNN\configfile.ini")
     dbparam = config_obj["ds"]
@@ -48,7 +50,7 @@ if __name__ == '__main__':
     model.load_weights(ckpt_dir)
 
     # Load and Preprocess images
-    img = load_img('demo/1.png')
+    img = load_img(img_pth)
     img = preprocess_img(img)
 
     # Inference
