@@ -1,8 +1,7 @@
 import configparser
 import tensorflow as tf
-
-# tf.compat.v1.disable_eager_execution()
-# from tensorflow.keras.losses import MS_SSIM
+from tensorflow import keras
+from keras.callbacks import ModelCheckpoint
 from helpers import *
 
 
@@ -47,10 +46,13 @@ if __name__ == '__main__':
         config_obj = configparser.ConfigParser()
         config_obj.read("D:\Coding Projects\Pycharm Projects\DeblurCNN\configfile.ini")
         dbparam = config_obj["ds"]
+        ckpt = config_obj["ckpt"]
 
         data_dir = dbparam['dataset_path']
         train_dir = data_dir + '/dummytrain'
         test_dir = data_dir + '/dummytest'
+        ckpt_dir = ckpt["weights_path"]
+        model_dir = ckpt["model_path"]
 
         # Load data
         input_shape = (360, 100, 3)
@@ -72,16 +74,32 @@ if __name__ == '__main__':
         autoencoder.compile(optimizer=optimizer, loss=ssim_loss, metrics=[ssim_loss, 'accuracy'])
         autoencoder.summary()
 
+        # Load weights (if any)
+        autoencoder.load_weights(ckpt_dir)
+
         # Train
-        autoencoder.fit(
+        cp_checkpoint = ModelCheckpoint(ckpt_dir, monitor='val_accuracy', save_best_only=True,
+                                        mode='max', verbose=1)
+        history = autoencoder.fit(
             x=trainblur,
             y=trainsharp,
             epochs=1,
             batch_size=16,
             shuffle=True,
             validation_data=(testblur, testsharp),
+            callbacks=[cp_checkpoint]
         )
+
+        # evaluate model
+        loss, accuracy, _ = autoencoder.evaluate(testblur, testsharp)
+        print(f"accuracy: {accuracy * 100:.2f}%")
+
+        # Save model
+        autoencoder.save(model_dir+f"/autoencoder-{accuracy* 100:.2f}%.h5")
 
         # Test set prediction
         predictions = autoencoder.predict(testblur)
         display(testblur, predictions, n=5)  # Display n results from test set
+
+        # Show Training History Graphs
+        plot_training_history(history)

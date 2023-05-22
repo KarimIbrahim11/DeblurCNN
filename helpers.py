@@ -1,4 +1,5 @@
 import os
+import datetime
 from PIL import Image
 import numpy as np
 import tensorflow as tf
@@ -81,4 +82,38 @@ def display(array1, array2, n):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
+    plt.show()
+
+
+# Plotting the training history (loss and vall
+def plot_training_history(history):
+    # Get the classification accuracy and loss-value
+    # for the training-set.
+    acc = history.history['accuracy']
+    loss = history.history['loss']
+    ssimloss = history.history['ssim_loss']
+
+    # Get it for the validation-set (we only use the test-set).
+    val_acc = history.history['val_accuracy']
+    val_loss = history.history['val_loss']
+    val_ssimloss = history.history['val_ssim_loss']
+
+    # Plot the accuracy and loss-values for the training-set.
+    plt.plot(acc, linestyle='-', color='b', label='Training Acc.')
+    plt.plot(loss, 'o', color='b', label='Training Loss')
+    plt.plot(ssimloss, 'x', color='b', label='Training SSIM Loss')
+
+    # Plot it for the test-set.
+    plt.plot(val_acc, linestyle='--', color='r', label='Test Acc.')
+    plt.plot(val_loss, 'o', color='r', label='Test Loss')
+    plt.plot(val_ssimloss, 'x', color='r', label='Test SSIM Loss')
+
+    # Plot title and legend.
+    plt.title('Training and Test Accuracy, Loss and SSIM')
+    plt.legend()
+
+    # Ensure the plot shows correctly.
+    plt.ylim(top=0.8)
+    plt.xlim(left=0)
+    plt.savefig(f'training_plots/train-{datetime.datetime.now().hour}.png')
     plt.show()
