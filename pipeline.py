@@ -28,7 +28,7 @@ def autoencoder_model(in_shape):
 
 
 def ssim_loss(y_true, y_pred):
-    return tf.reduce_mean(tf.image.ssim(y_true, y_pred, 2.0))
+    return 1-tf.reduce_mean(tf.image.ssim(y_true, y_pred, 2.0))
 
 
 if __name__ == '__main__':
@@ -83,7 +83,7 @@ if __name__ == '__main__':
         history = autoencoder.fit(
             x=trainblur,
             y=trainsharp,
-            epochs=1,
+            epochs=50,
             batch_size=16,
             shuffle=True,
             validation_data=(testblur, testsharp),
